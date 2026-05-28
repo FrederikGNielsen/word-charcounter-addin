@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Assignment Progress</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #fff;
+      color: #111;
+      font-size: 13px;
+      padding: 20px 18px;
+    }
+
+    .pct {
+      font-size: 48px;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      line-height: 1;
+      margin-bottom: 14px;
+      color: #111;
+      transition: color 0.4s;
+    }
+
+    .bar-track {
+      height: 2px;
+      background: #e8e8e8;
+      margin-bottom: 18px;
+    }
+    .bar-fill {
+      height: 2px;
+      background: #111;
+      width: 0%;
+      transition: width 0.5s ease, background 0.4s;
+    }
+
+    .stats {
+      color: #999;
+      line-height: 2;
+      margin-bottom: 20px;
+    }
+    .stats span { color: #111; }
+
+    hr {
+      border: none;
+      border-top: 1px solid #f0f0f0;
+      margin-bottom: 16px;
+    }
+
+    .target-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    input[type="number"] {
+      flex: 1;
+      border: 1px solid #e0e0e0;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 13px;
+      padding: 6px 8px;
+      color: #111;
+      outline: none;
+    }
+    input[type="number"]:focus { border-color: #bbb; }
+    input[type="number"]::-webkit-inner-spin-button { opacity: 0.3; }
+
+    button {
+      background: #111;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 12px;
+      padding: 6px 12px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    button:active { opacity: 0.75; }
+
+    .presets {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .preset {
+      background: transparent;
+      border: 1px solid #e0e0e0;
+      color: #999;
+      border-radius: 3px;
+      font-family: inherit;
+      font-size: 11px;
+      padding: 3px 8px;
+      cursor: pointer;
+    }
+    .preset:hover { border-color: #bbb; color: #111; }
+
+    .refresh {
+      background: transparent;
+      border: 1px solid #e8e8e8;
+      color: #bbb;
+      width: 100%;
+      padding: 8px;
+      font-size: 12px;
+      border-radius: 4px;
+    }
+    .refresh:hover { color: #666; border-color: #ccc; }
+
+    .msg {
+      color: #bbb;
+      font-size: 11px;
+      margin-bottom: 16px;
+      min-height: 16px;
+    }
+
+    .hidden { display: none; }
+
+    @media (prefers-color-scheme: dark) {
+      body { background: #0f0f0f; color: #eee; }
+      .pct { color: #eee; }
+      .bar-fill { background: #eee; }
+      .bar-track { background: #2a2a2a; }
+      .stats span { color: #eee; }
+      input[type="number"] { background: #1a1a1a; border-color: #2a2a2a; color: #eee; }
+      button { background: #eee; color: #111; }
+      .preset { border-color: #2a2a2a; color: #555; }
+      .preset:hover { border-color: #555; color: #eee; }
+      .refresh { border-color: #1e1e1e; color: #444; }
+      .refresh:hover { color: #888; border-color: #333; }
+      hr { border-color: #1e1e1e; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="progress-section" class="hidden">
+    <div class="pct" id="pct">0%</div>
+    <div class="bar-track"><div class="bar-fill" id="bar-fill"></div></div>
+    <div class="stats" id="stats"></div>
+    <div class="msg" id="msg"></div>
+    <hr>
+  </div>
+
+  <div class="target-row">
+    <input type="number" id="target-input" placeholder="Character target" min="1" />
+    <button onclick="setTarget()">Set</button>
+  </div>
+
+  <div class="presets">
+    <button class="preset" onclick="applyPreset(2000)">2 000</button>
+    <button class="preset" onclick="applyPreset(5000)">5 000</button>
+    <button class="preset" onclick="applyPreset(10000)">10 000</button>
+    <button class="preset" onclick="applyPreset(15000)">15 000</button>
+    <button class="preset" onclick="applyPreset(25000)">25 000</button>
+  </div>
+
+  <button class="refresh" onclick="refresh()" id="refresh-btn">↻ refresh</button>
+
+  <script>
+    let target = 0;
+
+    Office.onReady(() => {
+      setInterval(() => { if (target > 0) refresh(); }, 5000);
+    });
+
+    function applyPreset(n) {
+      document.getElementById('target-input').value = n;
+    }
+
+    function setTarget() {
+      const val = parseInt(document.getElementById('target-input').value, 10);
+      if (!val || val < 1) return;
+      target = val;
+      document.getElementById('progress-section').classList.remove('hidden');
+      refresh();
+    }
+
+    function refresh() {
+      if (!target) return;
+      Word.run(async ctx => {
+        const body = ctx.document.body;
+        body.load('text');
+        await ctx.sync();
+        const text = body.text || '';
+        const chars = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        updateUI(chars, words);
+      }).catch(() => {
+        document.getElementById('msg').textContent = 'could not read document';
+      });
+    }
+
+    function updateUI(chars, words) {
+      const pct = Math.min((chars / target) * 100, 999);
+      const over = chars > target;
+      const remaining = Math.max(target - chars, 0);
+
+      const color = pct >= 100 ? '#52c97a' : pct >= 75 ? '#111' : pct >= 50 ? '#111' : '#111';
+
+      const pctEl = document.getElementById('pct');
+      pctEl.textContent = Math.floor(pct) + '%';
+
+      const fill = document.getElementById('bar-fill');
+      fill.style.width = Math.min(pct, 100) + '%';
+      fill.style.background = pct >= 100 ? '#52c97a' : '';
+
+      const statsEl = document.getElementById('stats');
+      statsEl.innerHTML =
+        `<span>${fmt(chars)}</span> of <span>${fmt(target)}</span> chars &nbsp;·&nbsp; ` +
+        (over
+          ? `<span>+${fmt(chars - target)}</span> over`
+          : `<span>${fmt(remaining)}</span> left`) +
+        ` &nbsp;·&nbsp; <span>${fmt(words)}</span> words`;
+
+      const msgs = ['', 'started', 'keep going', 'halfway', 'almost there', 'done'];
+      const idx = pct >= 100 ? 5 : pct >= 75 ? 4 : pct >= 50 ? 3 : pct >= 25 ? 2 : pct > 0 ? 1 : 0;
+      document.getElementById('msg').textContent = msgs[idx];
+    }
+
+    function fmt(n) { return n.toLocaleString('en'); }
+  </script>
+</body>
+</html>

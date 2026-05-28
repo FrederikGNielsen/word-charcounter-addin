@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:type="TaskPaneApp">
+
+  <Id>a1b2c3d4-e5f6-7890-abcd-ef1234567890</Id>
+  <Version>1.0.0</Version>
+  <ProviderName>Assignment Tools</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+
+  <DisplayName DefaultValue="Assignment Progress" />
+  <Description DefaultValue="Track character count progress toward your assignment target" />
+
+  <Hosts>
+    <Host Name="Document" />
+  </Hosts>
+
+  <DefaultSettings>
+    <!--
+      IMPORTANT: Replace the URL below with wherever you host taskpane.html.
+      Options:
+        A) Local dev:   https://localhost:3000/taskpane/taskpane.html
+        B) GitHub Pages: https://YOUR-USERNAME.github.io/word-charcounter-addin/taskpane/taskpane.html
+        C) Any HTTPS host you control
+    -->
+    <SourceLocation DefaultValue="https://localhost:3000/taskpane/taskpane.html" />
+  </DefaultSettings>
+
+  <Permissions>ReadDocument</Permissions>
+
+</OfficeApp>
