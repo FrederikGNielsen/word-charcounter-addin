@@ -24,7 +24,7 @@
         B) GitHub Pages: https://YOUR-USERNAME.github.io/word-charcounter-addin/taskpane/taskpane.html
         C) Any HTTPS host you control
     -->
-    <SourceLocation DefaultValue="https://localhost:3000/taskpane/taskpane.html" />
+    <SourceLocation DefaultValue="https://frederikgnielsen.github.io/word-charcounter-addin/" />
   </DefaultSettings>
 
   <Permissions>ReadDocument</Permissions>
